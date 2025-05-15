@@ -1,27 +1,46 @@
 const subjectSelect = document.getElementById('subject');
 const customDiv = document.getElementById('customSubjectDiv');
+const outputSection = document.getElementById('outputSection');
+const commentBox = document.getElementById('generatedComment');
+const regenerateBtn = document.getElementById('regenerateBtn');
 
 subjectSelect.addEventListener('change', () => {
-  if (subjectSelect.value === 'Other') {
-    customDiv.style.display = 'block';
-  } else {
-    customDiv.style.display = 'none';
-  }
+  customDiv.style.display = subjectSelect.value === 'Other' ? 'block' : 'none';
 });
 
-document.getElementById('commentForm').addEventListener('submit', function (e) {
+document.getElementById('commentForm').addEventListener('submit', async function (e) {
   e.preventDefault();
+  await generateComment();
+});
 
+regenerateBtn.addEventListener('click', async () => {
+  const editedComment = commentBox.value;
+  const regenPrompt = `You are a teacher revising a report card comment for a student. Please improve and polish this text while keeping a professional, strengths-based tone:
+
+"${editedComment}"`;
+  
+  const newComment = await fakeOpenAICall(regenPrompt);
+  commentBox.value = newComment;
+});
+
+async function generateComment() {
   const name = document.getElementById('studentName').value;
   const gender = document.getElementById('gender').value;
-  const subject = subjectSelect.value === 'Other'
-    ? document.getElementById('customSubject').value
+  const grade = document.getElementById('grade').value;
+  const subject = subjectSelect.value === 'Other' 
+    ? document.getElementById('customSubject').value 
     : subjectSelect.value;
   const notes = document.getElementById('notes').value;
 
-  const mockResponse = `📘 Example Comment for ${name}:
+  const prompt = `You are a teacher writing a ${grade} report card comment in a professional and strengths-based tone. Use Ontario Curriculum language. The student's name is ${name}. Use '${gender.toLowerCase()}' pronouns. The subject is ${subject}. Based on these notes, write a 2–3 sentence comment: ${notes}`;
 
-${name} demonstrates strong engagement in ${subject}. ${gender} shows enthusiasm, participates actively, and reflects a solid understanding of concepts.`;
+  const aiComment = await fakeOpenAICall(prompt);
+  commentBox.value = aiComment;
+  outputSection.style.display = 'block';
+}
 
-  document.getElementById('output').innerText = mockResponse;
-});
+async function fakeOpenAICall(prompt) {
+  // Placeholder for OpenAI — replace with API call in future
+  console.log("Prompt sent to AI:", prompt);
+  return `This is a sample generated comment based on your prompt.`;
+}
