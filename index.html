@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <button id="viewSavedBtn">📁 View Saved Comments</button>
+
   <form id="commentForm">
     <h2>AI Report Card Comment Generator</h2>
 
@@ -65,6 +67,14 @@
     <h3>Generated Comment</h3>
     <textarea id="generatedComment" rows="5" style="width:100%;"></textarea>
     <button id="regenerateBtn">Regenerate with Edits</button>
+    <button id="approveBtn">✅ Approve & Save</button>
+  </div>
+
+  <div id="savedCommentsSection" style="display:none;">
+    <h2>📁 Saved Comments Viewer</h2>
+    <label for="studentSelect">Choose a student:</label>
+    <select id="studentSelect"></select>
+    <div id="savedOutput"></div>
   </div>
 
   <script src="app.js"></script>
