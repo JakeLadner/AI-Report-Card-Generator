@@ -3,12 +3,11 @@ const customDiv = document.getElementById('customSubjectDiv');
 const outputSection = document.getElementById('outputSection');
 const commentBox = document.getElementById('generatedComment');
 const regenerateBtn = document.getElementById('regenerateBtn');
-
-// Add Approve & Save button
-const approveBtn = document.createElement('button');
-approveBtn.textContent = "✅ Approve & Save";
-approveBtn.id = "approveBtn";
-outputSection.appendChild(approveBtn);
+const approveBtn = document.getElementById('approveBtn');
+const viewSavedBtn = document.getElementById('viewSavedBtn');
+const savedSection = document.getElementById('savedCommentsSection');
+const studentSelect = document.getElementById('studentSelect');
+const savedOutput = document.getElementById('savedOutput');
 
 subjectSelect.addEventListener('change', () => {
   customDiv.style.display = subjectSelect.value === 'Other' ? 'block' : 'none';
@@ -47,12 +46,47 @@ approveBtn.addEventListener('click', () => {
   console.log("SavedComments:", storage);
 });
 
+viewSavedBtn.addEventListener('click', () => {
+  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
+  savedSection.style.display = 'block';
+  studentSelect.innerHTML = "";
+
+  const students = Object.keys(storage);
+  if (students.length === 0) {
+    savedOutput.innerHTML = "<p>No saved comments found.</p>";
+    return;
+  }
+
+  studentSelect.innerHTML = students.map(name => `<option value="${name}">${name}</option>`).join("");
+  displaySavedComments(students[0]);
+
+  studentSelect.addEventListener('change', () => {
+    displaySavedComments(studentSelect.value);
+  });
+});
+
+function displaySavedComments(student) {
+  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
+  const subjects = storage[student];
+  let html = "";
+
+  for (const [subject, comments] of Object.entries(subjects)) {
+    html += `<h4>${subject}</h4><ul>`;
+    comments.forEach(comment => {
+      html += `<li>${comment}</li>`;
+    });
+    html += "</ul>";
+  }
+
+  savedOutput.innerHTML = html;
+}
+
 async function generateComment() {
   const name = document.getElementById('studentName').value;
   const gender = document.getElementById('gender').value;
   const grade = document.getElementById('grade').value;
-  const subject = subjectSelect.value === 'Other'
-    ? document.getElementById('customSubject').value
+  const subject = subjectSelect.value === 'Other' 
+    ? document.getElementById('customSubject').value 
     : subjectSelect.value;
   const notes = document.getElementById('notes').value;
 
