@@ -20,6 +20,19 @@
       <option>They</option>
     </select>
 
+    <label>Grade</label>
+    <select id="grade" required>
+      <option value="">Select Grade</option>
+      <option>Grade 1</option>
+      <option>Grade 2</option>
+      <option>Grade 3</option>
+      <option>Grade 4</option>
+      <option>Grade 5</option>
+      <option>Grade 6</option>
+      <option>Grade 7</option>
+      <option>Grade 8</option>
+    </select>
+
     <label>Subject</label>
     <select id="subject">
       <option>Reading</option>
@@ -48,7 +61,11 @@
     <button type="submit">Generate</button>
   </form>
 
-  <div id="output"></div>
+  <div id="outputSection" style="display:none;">
+    <h3>Generated Comment</h3>
+    <textarea id="generatedComment" rows="5" style="width:100%;"></textarea>
+    <button id="regenerateBtn">Regenerate with Edits</button>
+  </div>
 
   <script src="app.js"></script>
 </body>
