@@ -23,7 +23,7 @@ document.getElementById('commentForm').addEventListener('submit', async function
 
 regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
-  const regenPrompt = `You are a teacher revising a report card comment. Please improve and polish this text while keeping it professional and no more than 400 characters:\n\n"${editedComment}"`;
+  const regenPrompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario Learning Skills style). Limit it to 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await fakeOpenAICall(regenPrompt);
   commentBox.value = newComment.slice(0, 400);
@@ -130,10 +130,10 @@ async function mergeComments(student, subject) {
   const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
   const comments = storage[student][subject];
 
-  const prompt = `You are a teacher writing a report card. Please merge the following comments into one professional and strengths-based comment for ${student}'s ${subject}. Limit it to 400 characters:\n\n${comments.join("\n")}`;
+  const prompt = `You are a teacher writing a report card. Merge the following comments into one professional and growth-oriented summary for ${student}'s ${subject}. Use Ontario Learning Skills tone. Limit to 400 characters:\n\n${comments.join("\n")}`;
 
   let merged = await fakeOpenAICall(prompt);
-  merged = merged.trim().slice(0, 400); // Enforce length limit
+  merged = merged.trim().slice(0, 400);
 
   const displayBox = document.getElementById(`final-${student}-${subject}`);
   const charCount = document.getElementById(`charCount-${student}-${subject}`);
@@ -158,7 +158,27 @@ async function generateComment() {
     : subjectSelect.value;
   const notes = document.getElementById('notes').value;
 
-  const prompt = `You are a teacher writing a ${grade} report card comment in a professional and strengths-based tone. Use Ontario Curriculum language. The student's name is ${name}. Use '${gender.toLowerCase()}' pronouns. The subject is ${subject}. Based on these notes, write a 2–3 sentence comment (max 400 characters): ${notes}`;
+  const prompt = `
+You are a teacher writing a professional report card comment for the Ontario Learning Skills section.
+
+Use the tone and structure from these examples: calm, strengths-based, honest, and growth-oriented.
+
+Avoid casual or overly enthusiastic language. Do not use overly positive phrases like “amazing” or “wonderful.” Do not speak directly to the student.
+
+Structure:
+1. Describe strengths (work habits, collaboration, initiative, independence, etc.)
+2. Describe areas of growth with examples
+3. Offer a next step and note future direction
+4. End with a reflective, supportive closing
+
+Keep it within 400 characters. Focus on clarity and professionalism.
+
+Student: ${name}  
+Pronouns: ${gender}  
+Grade: ${grade}  
+Subject: ${subject}  
+Notes: ${notes}
+`;
 
   const aiComment = await fakeOpenAICall(prompt);
   commentBox.value = aiComment.slice(0, 400);
@@ -167,5 +187,5 @@ async function generateComment() {
 
 async function fakeOpenAICall(prompt) {
   console.log("Prompt sent to AI:", prompt);
-  return `This is a sample comment based on your prompt, trimmed to simulate the 400 character limit output that would appear on a real report card.`;
+  return `This is a sample comment generated based on your Learning Skills prompt. It is trimmed for style and length to reflect professional Ontario report card tone.`;
 }
