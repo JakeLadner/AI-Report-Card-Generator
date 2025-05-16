@@ -25,7 +25,7 @@ regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
   const regenPrompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario Learning Skills style). Limit it to 400 characters:\n\n"${editedComment}"`;
 
-  const newComment = await fakeOpenAICall(regenPrompt);
+  const newComment = await callOpenAI(regenPrompt);
   commentBox.value = newComment.slice(0, 400);
 });
 
@@ -132,7 +132,7 @@ async function mergeComments(student, subject) {
 
   const prompt = `You are a teacher writing a report card. Merge the following comments into one professional and growth-oriented summary for ${student}'s ${subject}. Use Ontario Learning Skills tone. Limit to 400 characters:\n\n${comments.join("\n")}`;
 
-  let merged = await fakeOpenAICall(prompt);
+  let merged = await callOpenAI(prompt);
   merged = merged.trim().slice(0, 400);
 
   const displayBox = document.getElementById(`final-${student}-${subject}`);
@@ -180,12 +180,27 @@ Subject: ${subject}
 Notes: ${notes}
 `;
 
-  const aiComment = await fakeOpenAICall(prompt);
+  const aiComment = await callOpenAI(prompt);
   commentBox.value = aiComment.slice(0, 400);
   outputSection.style.display = 'block';
 }
 
-async function fakeOpenAICall(prompt) {
-  console.log("Prompt sent to AI:", prompt);
-  return `This is a sample comment generated based on your Learning Skills prompt. It is trimmed for style and length to reflect professional Ontario report card tone.`;
+async function callOpenAI(prompt) {
+  const apiKey = "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";
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 300,
+      temperature: 0.7
+    })
+  });
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "⚠️ No response from AI.";
 }
