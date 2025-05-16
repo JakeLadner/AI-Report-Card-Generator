@@ -59,21 +59,29 @@ Notes: ${notes}
 
 async function callOpenAI(prompt) {
   const apiKey = "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";
-  
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 300,
-      temperature: 0.7
-    })
-  });
+  const orgId = "org-WytD3fknsOU7jjP1gLdkqBBd";
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "⚠️ No response from AI.";
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "OpenAI-Organization": orgId
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 300,
+        temperature: 0.7
+      })
+    });
+
+    const data = await response.json();
+    console.log("🔍 OpenAI response:", data);
+    return data.choices?.[0]?.message?.content || "⚠️ OpenAI returned no choices.";
+  } catch (err) {
+    console.error("❌ OpenAI API call failed:", err);
+    return "❌ Error calling OpenAI API.";
+  }
 }
