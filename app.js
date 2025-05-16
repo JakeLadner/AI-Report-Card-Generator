@@ -4,7 +4,7 @@ const outputSection = document.getElementById('outputSection');
 const commentBox = document.getElementById('generatedComment');
 const regenerateBtn = document.getElementById('regenerateBtn');
 
-// Replace this with your actual Replit backend URL
+// ✅ This is your Replit backend URL
 const BACKEND_URL = "https://ba2c948e-a8cd-4883-963f-47c7669bd43b-00-1j7o8cnv42e8a.janeway.replit.dev";
 
 subjectSelect.addEventListener('change', () => {
@@ -71,6 +71,7 @@ async function callBackend(prompt) {
     });
 
     const data = await response.json();
+    console.log("✅ Backend response:", data);
     return data.result || "⚠️ Backend returned no comment.";
   } catch (error) {
     console.error("❌ Error calling backend:", error);
