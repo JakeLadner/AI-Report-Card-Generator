@@ -58,7 +58,7 @@ Notes: ${notes}
 }
 
 async function callOpenAI(prompt) {
-  const apiKey = "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";
+  const apiKey = "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";
   
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
