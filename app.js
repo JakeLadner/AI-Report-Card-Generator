@@ -4,6 +4,9 @@ const outputSection = document.getElementById('outputSection');
 const commentBox = document.getElementById('generatedComment');
 const regenerateBtn = document.getElementById('regenerateBtn');
 
+// Replace this with your actual Replit backend URL
+const BACKEND_URL = "https://ba2c948e-a8cd-4883-963f-47c7669bd43b-00-1j7o8cnv42e8a.janeway.replit.dev";
+
 subjectSelect.addEventListener('change', () => {
   customDiv.style.display = subjectSelect.value === 'Other' ? 'block' : 'none';
 });
@@ -17,7 +20,7 @@ regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
   const prompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario Learning Skills style). Limit it to 400 characters:\n\n"${editedComment}"`;
 
-  const newComment = await callOpenAI(prompt);
+  const newComment = await callBackend(prompt);
   commentBox.value = newComment.slice(0, 400);
 });
 
@@ -52,36 +55,25 @@ Subject: ${subject}
 Notes: ${notes}
 `;
 
-  const aiComment = await callOpenAI(prompt);
+  const aiComment = await callBackend(prompt);
   commentBox.value = aiComment.slice(0, 400);
   outputSection.style.display = 'block';
 }
 
-async function callOpenAI(prompt) {
-  const apiKey = "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";
-  const orgId = "org-WytD3fknsOU7jjP1gLdkqBBd";
-
+async function callBackend(prompt) {
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(`${BACKEND_URL}/generate`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "OpenAI-Organization": orgId
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 300,
-        temperature: 0.7
-      })
+      body: JSON.stringify({ prompt })
     });
 
     const data = await response.json();
-    console.log("🔍 OpenAI response:", data);
-    return data.choices?.[0]?.message?.content || "⚠️ OpenAI returned no choices.";
-  } catch (err) {
-    console.error("❌ OpenAI API call failed:", err);
-    return "❌ Error calling OpenAI API.";
+    return data.result || "⚠️ Backend returned no comment.";
+  } catch (error) {
+    console.error("❌ Error calling backend:", error);
+    return "❌ Error contacting AI backend.";
   }
 }
