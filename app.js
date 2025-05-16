@@ -58,7 +58,7 @@ Notes: ${notes}
 }
 
 async function callOpenAI(prompt) {
-  const apiKey = "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";
+  const apiKey = "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";
   const orgId = "org-WytD3fknsOU7jjP1gLdkqBBd";
 
   try {
