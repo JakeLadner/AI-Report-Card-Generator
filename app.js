@@ -75,10 +75,23 @@ function displaySavedComments(student) {
     comments.forEach(comment => {
       html += `<li>${comment}</li>`;
     });
-    html += "</ul>";
+    html += `</ul><button onclick="mergeComments('${student}', '${subject}')">🧠 Merge Comments</button>`;
+    html += `<div id="merged-${student}-${subject}" style="margin-top: 10px; padding: 10px; background: #f0f0f0;"></div>`;
   }
 
   savedOutput.innerHTML = html;
+}
+
+async function mergeComments(student, subject) {
+  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
+  const comments = storage[student][subject];
+
+  const prompt = `You are a teacher writing a report card. Please merge the following comments into one cohesive, professional, and strengths-based comment for ${student}'s ${subject} progress:\n\n${comments.join("\n")}`;
+
+  const merged = await fakeOpenAICall(prompt);
+
+  const resultBox = document.getElementById(`merged-${student}-${subject}`);
+  resultBox.innerText = merged;
 }
 
 async function generateComment() {
@@ -99,5 +112,5 @@ async function generateComment() {
 
 async function fakeOpenAICall(prompt) {
   console.log("Prompt sent to AI:", prompt);
-  return `This is a sample generated comment based on your prompt.`;
+  return `This is a sample merged comment based on your prompt.`;
 }
