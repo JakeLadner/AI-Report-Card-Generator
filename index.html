@@ -4,18 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI Report Card Comment Generator</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <button id="viewSavedBtn">📁 View Saved Comments</button>
-  <button id="saveTermBtn">💾 Save Term</button>
-  <button id="resetBtn">🗑️ Start New Term</button>
-
   <form id="commentForm">
     <h2>AI Report Card Comment Generator</h2>
 
     <label>Student Name</label>
-    <input type="text" id="studentName" required />
+    <input type="text" id="studentName" required>
 
     <label>Gender</label>
     <select id="gender">
@@ -56,29 +52,41 @@
 
     <div id="customSubjectDiv" style="display: none;">
       <label>Enter Custom Subject</label>
-      <input type="text" id="customSubject" />
+      <input type="text" id="customSubject">
     </div>
 
     <label>Teacher Notes</label>
     <textarea id="notes" rows="4" required></textarea>
 
+    <div>
+      <label>
+        <input type="checkbox" id="longComment" />
+        Generate full final comment (multi-strand)
+      </label>
+    </div>
+
     <button type="submit">Generate</button>
   </form>
 
-  <div id="outputSection" style="display:none;">
+  <section id="outputSection" style="display: none;">
     <h3>Generated Comment</h3>
-    <textarea id="generatedComment" rows="5" style="width:100%;"></textarea>
-    <button id="regenerateBtn">Regenerate with Edits</button>
-    <button id="approveBtn">✅ Approve & Save</button>
-  </div>
+    <textarea id="generatedComment" rows="6" style="width: 100%;"></textarea>
+    <br/>
+    <button id="regenerateBtn">Regenerate</button>
+    <button id="approveBtn">Approve & Save</button>
+    <button id="viewSavedBtn">📁 View Saved Comments</button>
+  </section>
 
-  <div id="savedCommentsSection" style="display:none;">
-    <h2>📁 Saved Comments Viewer</h2>
-    <label for="studentSelect">Choose a student:</label>
+  <section id="savedCommentsSection" style="display: none;">
+    <h3>Saved Comments</h3>
+    <label>Select Student</label>
     <select id="studentSelect"></select>
     <div id="savedOutput"></div>
-    <div id="termHistoryOutput"></div>
-  </div>
+    <br/>
+    <button id="saveTermBtn">💾 Save Full Term</button>
+    <button id="resetBtn">🗑️ Clear Current Term</button>
+    <div id="termHistoryOutput" style="margin-top: 20px;"></div>
+  </section>
 
   <script src="app.js"></script>
 </body>
