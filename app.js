@@ -25,7 +25,7 @@ document.getElementById('commentForm').addEventListener('submit', async function
 
 regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
-  const prompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario Learning Skills style). Limit it to 400 characters:\n\n"${editedComment}"`;
+  const prompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario curriculum style). Limit it to 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await callBackend(prompt);
   commentBox.value = newComment.slice(0, 400);
@@ -132,7 +132,7 @@ async function mergeComments(student, subject) {
   const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
   const comments = storage[student][subject];
 
-  const prompt = `You are a teacher writing a report card. Merge the following comments into one professional and growth-oriented summary for ${student}'s ${subject}. Use Ontario Learning Skills tone. Limit to 400 characters:\n\n${comments.join("\n")}`;
+  const prompt = `You are a teacher writing a report card. Merge the following comments into one professional and growth-oriented summary for ${student}'s ${subject}. Use Ontario curriculum tone. Limit to 400 characters:\n\n${comments.join("\n")}`;
 
   let merged = await callBackend(prompt);
   merged = merged.trim().slice(0, 400);
@@ -160,20 +160,21 @@ async function generateComment() {
     : subjectSelect.value;
   const notes = document.getElementById('notes').value;
 
-  const prompt = `
-You are a teacher writing a professional report card comment for the Ontario Learning Skills section.
+  let prompt = "";
 
-Use the tone and structure from these examples: calm, strengths-based, honest, and growth-oriented.
+  if (subject.toLowerCase().includes("math")) {
+    prompt = `
+You are a teacher writing a **mathematics report card comment** following Ontario’s *Growing Success* and 2020 Math Curriculum.
 
-Avoid casual or overly enthusiastic language. Do not use overly positive phrases like “amazing” or “wonderful.” Do not speak directly to the student.
+Write a calm, specific, professional comment in the style used in Ontario elementary schools.
 
-Structure:
-1. Describe strengths (work habits, collaboration, initiative, independence, etc.)
-2. Describe areas of growth with examples
-3. Offer a next step and note future direction
-4. End with a reflective, supportive closing
-
-Keep it within 400 characters. Focus on clarity and professionalism.
+✔ Focus on significant strengths  
+✔ Describe areas requiring support  
+✔ Suggest next steps  
+✔ Connect learning across strands if appropriate  
+✔ Do not use vague or overly positive language like “amazing” or “great”  
+✔ Avoid commenting on all strands — focus on what was taught and assessed  
+✔ Keep within **400 characters**
 
 Student: ${name}  
 Pronouns: ${gender}  
@@ -181,6 +182,25 @@ Grade: ${grade}
 Subject: ${subject}  
 Notes: ${notes}
 `;
+  } else {
+    prompt = `
+You are a teacher writing a report card comment in a professional and strengths-based tone aligned to the Ontario curriculum. Be specific, honest, and growth-oriented.
+
+Focus on:
+1. Strengths (work habits, collaboration, thinking, communication, etc.)
+2. Areas for growth with examples
+3. A next step
+4. Calm, clear closing — no fluff
+
+Avoid vague or overly enthusiastic language. Keep within 400 characters.
+
+Student: ${name}  
+Pronouns: ${gender}  
+Grade: ${grade}  
+Subject: ${subject}  
+Notes: ${notes}
+`;
+  }
 
   const aiComment = await callBackend(prompt);
   commentBox.value = aiComment.slice(0, 400);
