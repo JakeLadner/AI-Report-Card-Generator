@@ -58,14 +58,12 @@
     <label>Teacher Notes</label>
     <textarea id="notes" rows="4" required></textarea>
 
-    <div>
-      <label>
-        <input type="checkbox" id="longComment" />
-        Generate full final comment (multi-strand)
-      </label>
+    <div style="display: flex; align-items: center; margin-top: 10px;">
+      <input type="checkbox" id="longComment" style="margin-right: 8px;" />
+      <label for="longComment">Generate full final comment (multi-strand)</label>
     </div>
 
-    <button type="submit">Generate</button>
+    <button type="submit" style="margin-top: 10px;">Generate</button>
   </form>
 
   <section id="outputSection" style="display: none;">
