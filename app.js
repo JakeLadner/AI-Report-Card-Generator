@@ -26,7 +26,7 @@ document.getElementById('commentForm').addEventListener('submit', async function
 
 regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
-  const prompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario curriculum style). Limit to 400 characters. End with a complete sentence:\n\n"${editedComment}"`;
+  const prompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario curriculum style). Avoid direct praise or phrases like "Keep it up". Do not include scores. Limit to 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await callBackend(prompt);
   commentBox.value = newComment.slice(0, 400);
@@ -134,8 +134,8 @@ async function mergeComments(student, subject) {
   const comments = storage[student][subject];
 
   let charLimit = 600;
-  if (subject.toLowerCase().includes("math")) charLimit = 800;
-  if (subject.toLowerCase().includes("learning")) charLimit = 1400;
+  if (/math/i.test(subject)) charLimit = 800;
+  if (/learning/i.test(subject)) charLimit = 1400;
 
   const prompt = `You are a teacher writing a professional Ontario report card comment in the subject of ${subject}.
 
@@ -143,6 +143,8 @@ Merge the following saved comments into one well-written, growth-focused, and pr
 
 ✔ Combine strengths, areas of need, and next steps  
 ✔ Avoid repeating sentences or phrases  
+✔ Do not refer to specific tests or grades  
+✔ Do not address the student directly or use praise like "Keep up the good work"  
 ✔ Use full sentences in calm, formal tone  
 ✔ Limit to approximately ${charLimit} characters  
 ✔ End with a polished sentence
@@ -180,22 +182,23 @@ async function generateComment() {
 
   let charLimit = 400;
   if (longMode) {
-    if (subject.toLowerCase().includes("learning")) charLimit = 1400;
-    else if (subject.toLowerCase().includes("math")) charLimit = 800;
+    if (/learning/i.test(subject)) charLimit = 1400;
+    else if (/math/i.test(subject)) charLimit = 800;
     else charLimit = 600;
   }
 
   let prompt = "";
 
-  if (subject.toLowerCase().includes("math")) {
+  if (/math/i.test(subject)) {
     prompt = `
 You are a teacher writing a math report card comment for the Ontario curriculum.
 
 ✔ Use only the details in the teacher's notes  
 ✔ Use calm, professional, and accurate tone  
 ✔ Do not speak directly to the student  
+✔ Do not include phrases like "Keep it up"  
+✔ Do not mention test scores or grades  
 ✔ Reflect both strengths and realistic next steps  
-✔ Do not invent strategies, topics, or assessments  
 ✔ Limit to ${charLimit} characters  
 ✔ End with a full sentence
 
@@ -212,8 +215,9 @@ You are a teacher writing an Ontario report card comment for the subject of ${su
 ✔ Use only the information in the notes  
 ✔ Write in calm, clear, strengths-based, professional tone  
 ✔ Include strengths, needs (if any), and next steps  
+✔ Do not mention specific scores or grades  
+✔ Do not speak directly to the student or use casual praise  
 ✔ Use full sentences, avoid repetition or fluff  
-✔ Do not speak directly to the student  
 ✔ Limit to approximately ${charLimit} characters  
 ✔ End with a complete sentence
 
