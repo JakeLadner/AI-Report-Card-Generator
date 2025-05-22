@@ -29,7 +29,7 @@ regenerateBtn.addEventListener('click', async () => {
   const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove any vague praise. Do not include marks, percentages, or direct address of the student. Keep tone professional and strengths-based. Limit to 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await callBackend(prompt);
-  commentBox.value = newComment.slice(0, 400);
+  commentBox.value = cleanComment(newComment.slice(0, 400));
 });
 
 approveBtn.addEventListener('click', () => {
@@ -153,7 +153,7 @@ Subject: ${subject}
 Comments:\n\n${comments.join("\n\n")}`;
 
   let merged = await callBackend(prompt, charLimit);
-  merged = merged.trim().slice(0, charLimit);
+  merged = cleanComment(merged.trim().slice(0, charLimit));
 
   const displayBox = document.getElementById(`final-${student}-${subject}`);
   const charCount = document.getElementById(`charCount-${student}-${subject}`);
@@ -227,7 +227,7 @@ Notes: ${notes}
   }
 
   const aiComment = await callBackend(prompt, charLimit);
-  commentBox.value = aiComment.slice(0, charLimit);
+  commentBox.value = cleanComment(aiComment.slice(0, charLimit));
   outputSection.style.display = 'block';
 }
 
@@ -251,4 +251,18 @@ async function callBackend(prompt, charLimit) {
     console.error("❌ Error calling backend:", error);
     return "❌ Error contacting AI backend.";
   }
+}
+
+function cleanComment(comment) {
+  const lines = comment.split(/[.?!]\s*/).filter(Boolean);
+  const filtered = lines.filter(line => {
+    const lower = line.toLowerCase().trim();
+    return (
+      !lower.includes("keep up the good work") &&
+      !lower.includes("well done") &&
+      !lower.includes("great job") &&
+      !/^(encouraging|continue|keep|aim|work)\b/i.test(lower)
+    );
+  });
+  return filtered.join(". ") + (filtered.length ? "." : "");
 }
