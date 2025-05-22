@@ -253,7 +253,6 @@ async function callBackend(prompt, charLimit) {
   }
 }
 
-// ✅ SMART FILTER FOR QUALITY CONTROL
 function cleanComment(comment) {
   const bannedPhrases = [
     "keep up the good work",
@@ -264,7 +263,9 @@ function cleanComment(comment) {
     "effectively",
     "beyond 180",
     "real-world",
-    "demonstrates proficiency"
+    "demonstrates proficiency",
+    "end of comment",
+    "this concludes the comment"
   ];
 
   const lines = comment
@@ -279,5 +280,8 @@ function cleanComment(comment) {
       );
     });
 
-  return lines.length ? lines.join(". ") + "." : "⚠️ Cleaned comment too short.";
+  if (!lines.length) return "⚠️ Cleaned comment too short.";
+
+  const final = lines.join(". ");
+  return final.endsWith(".") ? final : final + ".";
 }
