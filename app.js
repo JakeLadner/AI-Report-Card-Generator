@@ -185,13 +185,35 @@ async function generateComment() {
     else charLimit = 600;
   }
 
-  const prompt = `
+  let prompt = "";
+
+  if (subject.toLowerCase().includes("math")) {
+    prompt = `
+You are a teacher writing a math report card comment for the Ontario curriculum.
+
+✔ Use only the details in the teacher's notes  
+✔ Use calm, professional, and accurate tone  
+✔ Do not speak directly to the student  
+✔ Reflect both strengths and realistic next steps  
+✔ Do not invent strategies, topics, or assessments  
+✔ Limit to ${charLimit} characters  
+✔ End with a full sentence
+
+Student: ${name}  
+Pronouns: ${gender}  
+Grade: ${grade}  
+Subject: ${subject}  
+Notes: ${notes}
+`;
+  } else {
+    prompt = `
 You are a teacher writing an Ontario report card comment for the subject of ${subject}.
 
 ✔ Use only the information in the notes  
 ✔ Write in calm, clear, strengths-based, professional tone  
 ✔ Include strengths, needs (if any), and next steps  
 ✔ Use full sentences, avoid repetition or fluff  
+✔ Do not speak directly to the student  
 ✔ Limit to approximately ${charLimit} characters  
 ✔ End with a complete sentence
 
@@ -200,6 +222,7 @@ Pronouns: ${gender}
 Grade: ${grade}  
 Notes: ${notes}
 `;
+  }
 
   const aiComment = await callBackend(prompt);
   commentBox.value = aiComment.slice(0, charLimit);
