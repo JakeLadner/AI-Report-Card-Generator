@@ -26,7 +26,7 @@ document.getElementById('commentForm').addEventListener('submit', async function
 
 regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
-  const prompt = `You are a teacher revising a report card comment. Improve this text using a calm, professional, growth-oriented tone (Ontario curriculum style). Avoid direct praise or phrases like "Keep it up". Do not include scores. Limit to 400 characters:\n\n"${editedComment}"`;
+  const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove any vague praise. Do not include marks, percentages, or direct address of the student. Keep tone professional and strengths-based. Limit to 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await callBackend(prompt);
   commentBox.value = newComment.slice(0, 400);
@@ -137,23 +137,22 @@ async function mergeComments(student, subject) {
   if (/math/i.test(subject)) charLimit = 800;
   if (/learning/i.test(subject)) charLimit = 1400;
 
-  const prompt = `You are a teacher writing a professional Ontario report card comment in the subject of ${subject}.
+  const prompt = `You are writing a final Ontario report card comment for ${subject}.
 
-Merge the following saved comments into one well-written, growth-focused, and professional final comment.
+Merge the following comments into a single professional, strengths-based, and objective comment.
 
-✔ Combine strengths, areas of need, and next steps  
-✔ Avoid repeating sentences or phrases  
-✔ Do not refer to specific tests or grades  
-✔ Do not address the student directly or use praise like "Keep up the good work"  
-✔ Use full sentences in calm, formal tone  
-✔ Limit to approximately ${charLimit} characters  
-✔ End with a polished sentence
+✔ No repetition  
+✔ No marks, percentages, or test names  
+✔ No direct address of the student  
+✔ No phrases like “Keep up the good work” or “Well done”  
+✔ Use full sentences, calm tone, and end with a summary  
+✔ Limit to ${charLimit} characters
 
 Student: ${student}  
 Subject: ${subject}  
-Comments: ${comments.join("\n\n")}`;
+Comments:\n\n${comments.join("\n\n")}`;
 
-  let merged = await callBackend(prompt);
+  let merged = await callBackend(prompt, charLimit);
   merged = merged.trim().slice(0, charLimit);
 
   const displayBox = document.getElementById(`final-${student}-${subject}`);
@@ -191,16 +190,15 @@ async function generateComment() {
 
   if (/math/i.test(subject)) {
     prompt = `
-You are a teacher writing a math report card comment for the Ontario curriculum.
+You are writing a Math comment for an Ontario elementary report card.
 
-✔ Use only the details in the teacher's notes  
-✔ Use calm, professional, and accurate tone  
-✔ Do not speak directly to the student  
-✔ Do not include phrases like "Keep it up"  
-✔ Do not mention test scores or grades  
-✔ Reflect both strengths and realistic next steps  
-✔ Limit to ${charLimit} characters  
-✔ End with a full sentence
+✔ Use ONLY the teacher’s notes as input  
+✔ DO NOT mention test scores, percentages, or evaluations  
+✔ DO NOT speak directly to the student or use casual praise  
+✔ Focus on strengths, skills, and measurable next steps  
+✔ Tone must be objective, professional, and curriculum-aligned  
+✔ End with a complete sentence  
+✔ Limit to ${charLimit} characters
 
 Student: ${name}  
 Pronouns: ${gender}  
@@ -210,37 +208,40 @@ Notes: ${notes}
 `;
   } else {
     prompt = `
-You are a teacher writing an Ontario report card comment for the subject of ${subject}.
+You are writing a subject-specific comment for an Ontario elementary report card.
 
-✔ Use only the information in the notes  
-✔ Write in calm, clear, strengths-based, professional tone  
-✔ Include strengths, needs (if any), and next steps  
-✔ Do not mention specific scores or grades  
-✔ Do not speak directly to the student or use casual praise  
-✔ Use full sentences, avoid repetition or fluff  
-✔ Limit to approximately ${charLimit} characters  
-✔ End with a complete sentence
+✔ Use ONLY the teacher’s notes  
+✔ DO NOT include any test scores, grades, or percentages  
+✔ DO NOT address the student or use encouragement phrases  
+✔ Focus on strengths, needs (if any), and next steps  
+✔ Use professional, formal tone  
+✔ End with a complete sentence  
+✔ Limit to approximately ${charLimit} characters
 
 Student: ${name}  
 Pronouns: ${gender}  
 Grade: ${grade}  
+Subject: ${subject}  
 Notes: ${notes}
 `;
   }
 
-  const aiComment = await callBackend(prompt);
+  const aiComment = await callBackend(prompt, charLimit);
   commentBox.value = aiComment.slice(0, charLimit);
   outputSection.style.display = 'block';
 }
 
-async function callBackend(prompt) {
+async function callBackend(prompt, charLimit) {
   try {
     const response = await fetch(`${BACKEND_URL}/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({
+        prompt,
+        temperature: 0.3
+      })
     });
 
     const data = await response.json();
