@@ -253,16 +253,31 @@ async function callBackend(prompt, charLimit) {
   }
 }
 
+// ✅ SMART FILTER FOR QUALITY CONTROL
 function cleanComment(comment) {
-  const lines = comment.split(/[.?!]\s*/).filter(Boolean);
-  const filtered = lines.filter(line => {
-    const lower = line.toLowerCase().trim();
-    return (
-      !lower.includes("keep up the good work") &&
-      !lower.includes("well done") &&
-      !lower.includes("great job") &&
-      !/^(encouraging|continue|keep|aim|work)\b/i.test(lower)
-    );
-  });
-  return filtered.join(". ") + (filtered.length ? "." : "");
+  const bannedPhrases = [
+    "keep up the good work",
+    "well done",
+    "great job",
+    "shows potential",
+    "proficient",
+    "effectively",
+    "beyond 180",
+    "real-world",
+    "demonstrates proficiency"
+  ];
+
+  const lines = comment
+    .split(/[.?!]\s*/)
+    .filter(Boolean)
+    .map(l => l.trim())
+    .filter(line => {
+      const lower = line.toLowerCase();
+      return (
+        !bannedPhrases.some(p => lower.includes(p)) &&
+        !/^(encouraging|continue|keep|aim|work)\b/i.test(lower)
+      );
+    });
+
+  return lines.length ? lines.join(". ") + "." : "⚠️ Cleaned comment too short.";
 }
