@@ -26,10 +26,10 @@ document.getElementById('commentForm').addEventListener('submit', async function
 
 regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
-  const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove any vague praise. Do not include marks, percentages, or direct address of the student. Keep tone professional and strengths-based. Limit to 400 characters:\n\n"${editedComment}"`;
+  const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove any vague praise. Do not include marks, percentages, or direct address of the student. Keep tone professional and strengths-based. Limit to approximately 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await callBackend(prompt);
-  commentBox.value = cleanComment(newComment.slice(0, 400));
+  commentBox.value = cleanComment(newComment);
 });
 
 approveBtn.addEventListener('click', () => {
@@ -146,20 +146,20 @@ Merge the following comments into a single professional, strengths-based, and ob
 ✔ No direct address of the student  
 ✔ No phrases like “Keep up the good work” or “Well done”  
 ✔ Use full sentences, calm tone, and end with a summary  
-✔ Limit to ${charLimit} characters
+✔ Limit to approximately ${charLimit} characters
 
 Student: ${student}  
 Subject: ${subject}  
 Comments:\n\n${comments.join("\n\n")}`;
 
   let merged = await callBackend(prompt, charLimit);
-  merged = cleanComment(merged.trim().slice(0, charLimit));
+  merged = cleanComment(merged);
 
   const displayBox = document.getElementById(`final-${student}-${subject}`);
   const charCount = document.getElementById(`charCount-${student}-${subject}`);
 
   displayBox.innerText = merged;
-  charCount.innerText = `${merged.length} / ${charLimit} characters`;
+  charCount.innerText = `${merged.length} / ~${charLimit} characters`;
 }
 
 function copyMerged(student, subject) {
@@ -198,7 +198,7 @@ You are writing a Math comment for an Ontario elementary report card.
 ✔ Focus on strengths, skills, and measurable next steps  
 ✔ Tone must be objective, professional, and curriculum-aligned  
 ✔ End with a complete sentence  
-✔ Limit to ${charLimit} characters
+✔ Limit to approximately ${charLimit} characters
 
 Student: ${name}  
 Pronouns: ${gender}  
@@ -227,7 +227,7 @@ Notes: ${notes}
   }
 
   const aiComment = await callBackend(prompt, charLimit);
-  commentBox.value = cleanComment(aiComment.slice(0, charLimit));
+  commentBox.value = cleanComment(aiComment);
   outputSection.style.display = 'block';
 }
 
