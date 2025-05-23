@@ -265,7 +265,8 @@ function cleanComment(comment) {
     "real-world",
     "demonstrates proficiency",
     "end of comment",
-    "this concludes the comment"
+    "this concludes the comment",
+    "end of report card comment"
   ];
 
   const lines = comment
