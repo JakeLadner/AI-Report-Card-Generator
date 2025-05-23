@@ -1,3 +1,4 @@
+// === ELEMENT SETUP ===
 const subjectSelect = document.getElementById('subject');
 const customDiv = document.getElementById('customSubjectDiv');
 const outputSection = document.getElementById('outputSection');
@@ -15,6 +16,7 @@ const longCommentCheckbox = document.getElementById('longComment');
 
 const BACKEND_URL = "https://ba2c948e-a8cd-4883-963f-47c7669bd43b-00-1j7o8cnv42e8a.janeway.replit.dev";
 
+// === EVENT LISTENERS ===
 subjectSelect.addEventListener('change', () => {
   customDiv.style.display = subjectSelect.value === 'Other' ? 'block' : 'none';
 });
@@ -93,6 +95,7 @@ resetBtn.addEventListener('click', () => {
   }
 });
 
+// === DISPLAY FUNCTIONS ===
 function displaySavedComments(student) {
   const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
   const subjects = storage[student];
@@ -129,6 +132,7 @@ function displayTermHistory(terms) {
   termHistoryOutput.innerHTML = html;
 }
 
+// === GENERATE COMMENT ===
 async function generateComment() {
   const name = document.getElementById('studentName').value;
   const gender = document.getElementById('gender').value;
@@ -146,15 +150,42 @@ async function generateComment() {
     else charLimit = 600;
   }
 
-  const prompt = `
-You are writing an Ontario elementary report card comment.
+  let prompt = "";
+
+  if (/math/i.test(subject)) {
+    prompt = `
+You are writing a professional Ontario elementary report card comment for MATH.
+
+The teacher has provided notes. Use them to generate a comment that follows these strict rules:
+
+❌ Do NOT mention test scores, percentages, grades, or assignments  
+❌ Do NOT speak directly to the student (avoid “Mason should continue…”)  
+❌ Do NOT use vague language like “understanding of angles”  
+❌ Do NOT repeat the same word multiple times in a paragraph  
+❌ Do NOT use motivational or praise phrases (e.g. “keep up the good work”)
+
+✅ Focus on observable learning behaviours  
+✅ Mention specific math skills (e.g. measurement, classification, problem-solving)  
+✅ Use a clear next step  
+✅ End with a professional full sentence  
+✅ Limit to approximately ${charLimit} characters
+
+Student: ${name}  
+Pronouns: ${gender}  
+Grade: ${grade}  
+Subject: ${subject}  
+Notes: ${notes}
+`;
+  } else {
+    prompt = `
+You are writing a subject-specific comment for an Ontario elementary report card.
 
 ✔ Use ONLY the teacher’s notes  
-✔ DO NOT include grades, percentages, or test names  
+✔ DO NOT include grades, test names, or percentages  
 ✔ DO NOT address the student directly  
-✔ DO NOT reference future grade levels or curriculum (e.g. “In Grade 5…”)  
-✔ Focus on strengths, skills, and measurable next steps  
-✔ End with a full sentence  
+✔ DO NOT reference future grades  
+✔ Focus on strengths, needs, and next steps  
+✔ Keep it professional, calm, and clear  
 ✔ Limit to approximately ${charLimit} characters
 
 Student: ${name}  
@@ -163,12 +194,14 @@ Grade: ${grade}
 Subject: ${subject}  
 Notes: ${notes}
 `;
+  }
 
   const aiComment = await callBackend(prompt, charLimit);
   commentBox.value = cleanComment(aiComment);
   outputSection.style.display = 'block';
 }
 
+// === BACKEND CALL ===
 async function callBackend(prompt, charLimit) {
   try {
     const response = await fetch(`${BACKEND_URL}/generate`, {
@@ -185,6 +218,7 @@ async function callBackend(prompt, charLimit) {
   }
 }
 
+// === CLEANUP & FILTERING ===
 function cleanComment(comment) {
   const bannedPhrases = [
     "keep up the good work",
@@ -220,7 +254,6 @@ function cleanComment(comment) {
     });
 
   if (!lines.length) return "⚠️ Cleaned comment too short.";
-
   const final = lines.join(". ");
   return final.endsWith(".") ? final : final + ".";
 }
