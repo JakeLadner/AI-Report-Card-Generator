@@ -33,7 +33,6 @@ regenerateBtn.addEventListener('click', async () => {
   const newComment = await callBackend(prompt);
   commentBox.value = cleanComment(newComment);
 });
-
 approveBtn.addEventListener('click', () => {
   const name = document.getElementById('studentName').value.trim();
   const subject = subjectSelect.value === 'Other'
@@ -94,45 +93,6 @@ resetBtn.addEventListener('click', () => {
     location.reload();
   }
 });
-
-// === DISPLAY FUNCTIONS ===
-function displaySavedComments(student) {
-  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
-  const subjects = storage[student];
-  let html = "";
-
-  for (const [subject, comments] of Object.entries(subjects)) {
-    html += `<h4>${subject}</h4><ul>`;
-    comments.forEach(comment => {
-      html += `<li>${comment}</li>`;
-    });
-    html += `</ul>
-      <button onclick="mergeComments('${student}', '${subject}')">🧠 Merge Comments</button>
-      <div id="merged-${student}-${subject}" style="margin-top:10px; padding:10px; background:#eef;">
-        <strong>Final Comment for ${subject}:</strong><br/>
-        <div id="final-${student}-${subject}"></div>
-        <div id="charCount-${student}-${subject}" style="font-size: 0.8em; color: gray;"></div>
-        <button onclick="copyMerged('${student}', '${subject}')">📋 Copy to Clipboard</button>
-      </div>`;
-  }
-
-  savedOutput.innerHTML = html;
-}
-
-function displayTermHistory(terms) {
-  if (!terms.length) {
-    termHistoryOutput.innerHTML = "<h3>No past terms saved yet.</h3>";
-    return;
-  }
-
-  let html = "<h3>📂 Past Terms</h3>";
-  terms.forEach(term => {
-    html += `<h4>${term.timestamp}</h4><pre>${JSON.stringify(term.data, null, 2)}</pre>`;
-  });
-  termHistoryOutput.innerHTML = html;
-}
-
-// === GENERATE COMMENT ===
 async function generateComment() {
   const name = document.getElementById('studentName').value;
   const gender = document.getElementById('gender').value;
@@ -170,6 +130,9 @@ The teacher has provided notes. Use them to generate a comment that follows thes
 ✅ End with a professional full sentence  
 ✅ Limit to approximately ${charLimit} characters
 
+Use this as an example of structure, tone, and clarity:  
+"Mason consistently demonstrates the ability to accurately measure and classify angles up to 180 degrees. To support continued growth, he will focus on applying these skills in increasingly complex geometric problem-solving tasks."
+
 Student: ${name}  
 Pronouns: ${gender}  
 Grade: ${grade}  
@@ -200,7 +163,6 @@ Notes: ${notes}
   commentBox.value = cleanComment(aiComment);
   outputSection.style.display = 'block';
 }
-
 // === BACKEND CALL ===
 async function callBackend(prompt, charLimit) {
   try {
@@ -218,7 +180,7 @@ async function callBackend(prompt, charLimit) {
   }
 }
 
-// === CLEANUP & FILTERING ===
+// === CLEANUP FILTERING ===
 function cleanComment(comment) {
   const bannedPhrases = [
     "keep up the good work",
@@ -254,6 +216,7 @@ function cleanComment(comment) {
     });
 
   if (!lines.length) return "⚠️ Cleaned comment too short.";
+
   const final = lines.join(". ");
   return final.endsWith(".") ? final : final + ".";
 }
