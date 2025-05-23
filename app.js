@@ -1,3 +1,4 @@
+// ---[ Setup and Element References ]---
 const subjectSelect = document.getElementById('subject');
 const customDiv = document.getElementById('customSubjectDiv');
 const outputSection = document.getElementById('outputSection');
@@ -15,6 +16,7 @@ const longCommentCheckbox = document.getElementById('longComment');
 
 const BACKEND_URL = "https://ba2c948e-a8cd-4883-963f-47c7669bd43b-00-1j7o8cnv42e8a.janeway.replit.dev";
 
+// ---[ Event Handlers ]---
 subjectSelect.addEventListener('change', () => {
   customDiv.style.display = subjectSelect.value === 'Other' ? 'block' : 'none';
 });
@@ -26,7 +28,7 @@ document.getElementById('commentForm').addEventListener('submit', async function
 
 regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
-  const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove any vague praise. Do not include marks, percentages, or direct address of the student. Keep tone professional and strengths-based. Limit to approximately 400 characters:\n\n"${editedComment}"`;
+  const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove vague or generic phrasing. Do not include marks, percentages, or direct address of the student. Keep tone professional and strengths-based. Limit to approximately 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await callBackend(prompt);
   commentBox.value = cleanComment(newComment);
@@ -93,6 +95,7 @@ resetBtn.addEventListener('click', () => {
   }
 });
 
+// ---[ Comment Display ]---
 function displaySavedComments(student) {
   const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
   const subjects = storage[student];
@@ -129,46 +132,7 @@ function displayTermHistory(terms) {
   termHistoryOutput.innerHTML = html;
 }
 
-async function mergeComments(student, subject) {
-  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
-  const comments = storage[student][subject];
-
-  let charLimit = 600;
-  if (/math/i.test(subject)) charLimit = 800;
-  if (/learning/i.test(subject)) charLimit = 1400;
-
-  const prompt = `You are writing a final Ontario report card comment for ${subject}.
-
-Merge the following comments into a single professional, strengths-based, and objective comment.
-
-✔ No repetition  
-✔ No marks, percentages, or test names  
-✔ No direct address of the student  
-✔ No phrases like “Keep up the good work” or “Well done”  
-✔ Use full sentences, calm tone, and end with a summary  
-✔ Limit to approximately ${charLimit} characters
-
-Student: ${student}  
-Subject: ${subject}  
-Comments:\n\n${comments.join("\n\n")}`;
-
-  let merged = await callBackend(prompt, charLimit);
-  merged = cleanComment(merged);
-
-  const displayBox = document.getElementById(`final-${student}-${subject}`);
-  const charCount = document.getElementById(`charCount-${student}-${subject}`);
-
-  displayBox.innerText = merged;
-  charCount.innerText = `${merged.length} / ~${charLimit} characters`;
-}
-
-function copyMerged(student, subject) {
-  const text = document.getElementById(`final-${student}-${subject}`).innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("📋 Merged comment copied to clipboard!");
-  });
-}
-
+// ---[ AI Comment Generation ]---
 async function generateComment() {
   const name = document.getElementById('studentName').value;
   const gender = document.getElementById('gender').value;
@@ -186,18 +150,14 @@ async function generateComment() {
     else charLimit = 600;
   }
 
-  let prompt = "";
+  const prompt = `
+You are writing an Ontario elementary report card comment.
 
-  if (/math/i.test(subject)) {
-    prompt = `
-You are writing a Math comment for an Ontario elementary report card.
-
-✔ Use ONLY the teacher’s notes as input  
-✔ DO NOT mention test scores, percentages, or evaluations  
-✔ DO NOT speak directly to the student or use casual praise  
-✔ Focus on strengths, skills, and measurable next steps  
-✔ Tone must be objective, professional, and curriculum-aligned  
-✔ End with a complete sentence  
+✔ Use only the teacher’s notes  
+✔ Do NOT include marks, grades, test names  
+✔ Do NOT speak to the student directly  
+✔ Focus on strengths, needs, and next steps  
+✔ End with a full sentence  
 ✔ Limit to approximately ${charLimit} characters
 
 Student: ${name}  
@@ -206,25 +166,6 @@ Grade: ${grade}
 Subject: ${subject}  
 Notes: ${notes}
 `;
-  } else {
-    prompt = `
-You are writing a subject-specific comment for an Ontario elementary report card.
-
-✔ Use ONLY the teacher’s notes  
-✔ DO NOT include any test scores, grades, or percentages  
-✔ DO NOT address the student or use encouragement phrases  
-✔ Focus on strengths, needs (if any), and next steps  
-✔ Use professional, formal tone  
-✔ End with a complete sentence  
-✔ Limit to approximately ${charLimit} characters
-
-Student: ${name}  
-Pronouns: ${gender}  
-Grade: ${grade}  
-Subject: ${subject}  
-Notes: ${notes}
-`;
-  }
 
   const aiComment = await callBackend(prompt, charLimit);
   commentBox.value = cleanComment(aiComment);
@@ -235,17 +176,11 @@ async function callBackend(prompt, charLimit) {
   try {
     const response = await fetch(`${BACKEND_URL}/generate`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt,
-        temperature: 0.3
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, temperature: 0.3 })
     });
 
     const data = await response.json();
-    console.log("✅ Backend response:", data);
     return data.result || "⚠️ Backend returned no comment.";
   } catch (error) {
     console.error("❌ Error calling backend:", error);
@@ -253,6 +188,7 @@ async function callBackend(prompt, charLimit) {
   }
 }
 
+// ---[ Final Cleanup Filter ]---
 function cleanComment(comment) {
   const bannedPhrases = [
     "keep up the good work",
@@ -266,13 +202,18 @@ function cleanComment(comment) {
     "demonstrates proficiency",
     "end of comment",
     "this concludes the comment",
-    "end of report card comment"
+    "end of report card comment",
+    "continuing to apply",
+    "will support his growth",
+    "will support her growth",
+    "will support their growth",
+    "to support learning"
   ];
 
   const lines = comment
     .split(/[.?!]\s*/)
     .filter(Boolean)
-    .map(l => l.trim())
+    .map(line => line.trim())
     .filter(line => {
       const lower = line.toLowerCase();
       return (
