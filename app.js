@@ -1,4 +1,3 @@
-// ---[ Setup and Element References ]---
 const subjectSelect = document.getElementById('subject');
 const customDiv = document.getElementById('customSubjectDiv');
 const outputSection = document.getElementById('outputSection');
@@ -16,7 +15,6 @@ const longCommentCheckbox = document.getElementById('longComment');
 
 const BACKEND_URL = "https://ba2c948e-a8cd-4883-963f-47c7669bd43b-00-1j7o8cnv42e8a.janeway.replit.dev";
 
-// ---[ Event Handlers ]---
 subjectSelect.addEventListener('change', () => {
   customDiv.style.display = subjectSelect.value === 'Other' ? 'block' : 'none';
 });
@@ -28,7 +26,7 @@ document.getElementById('commentForm').addEventListener('submit', async function
 
 regenerateBtn.addEventListener('click', async () => {
   const editedComment = commentBox.value;
-  const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove vague or generic phrasing. Do not include marks, percentages, or direct address of the student. Keep tone professional and strengths-based. Limit to approximately 400 characters:\n\n"${editedComment}"`;
+  const prompt = `You are an Ontario teacher revising a report card comment. Tighten the language and remove vague or generic phrasing. Do not include marks, percentages, or direct address of the student. Do not refer to future grade levels. Keep tone professional and strengths-based. Limit to approximately 400 characters:\n\n"${editedComment}"`;
 
   const newComment = await callBackend(prompt);
   commentBox.value = cleanComment(newComment);
@@ -95,7 +93,6 @@ resetBtn.addEventListener('click', () => {
   }
 });
 
-// ---[ Comment Display ]---
 function displaySavedComments(student) {
   const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
   const subjects = storage[student];
@@ -132,7 +129,6 @@ function displayTermHistory(terms) {
   termHistoryOutput.innerHTML = html;
 }
 
-// ---[ AI Comment Generation ]---
 async function generateComment() {
   const name = document.getElementById('studentName').value;
   const gender = document.getElementById('gender').value;
@@ -153,10 +149,11 @@ async function generateComment() {
   const prompt = `
 You are writing an Ontario elementary report card comment.
 
-✔ Use only the teacher’s notes  
-✔ Do NOT include marks, grades, test names  
-✔ Do NOT speak to the student directly  
-✔ Focus on strengths, needs, and next steps  
+✔ Use ONLY the teacher’s notes  
+✔ DO NOT include grades, percentages, or test names  
+✔ DO NOT address the student directly  
+✔ DO NOT reference future grade levels or curriculum (e.g. “In Grade 5…”)  
+✔ Focus on strengths, skills, and measurable next steps  
 ✔ End with a full sentence  
 ✔ Limit to approximately ${charLimit} characters
 
@@ -188,7 +185,6 @@ async function callBackend(prompt, charLimit) {
   }
 }
 
-// ---[ Final Cleanup Filter ]---
 function cleanComment(comment) {
   const bannedPhrases = [
     "keep up the good work",
@@ -207,7 +203,8 @@ function cleanComment(comment) {
     "will support his growth",
     "will support her growth",
     "will support their growth",
-    "to support learning"
+    "to support learning",
+    "in grade"
   ];
 
   const lines = comment
