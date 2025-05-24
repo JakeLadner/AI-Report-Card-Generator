@@ -2,7 +2,6 @@ const subjectSelect = document.getElementById('subject');
 const customDiv = document.getElementById('customSubjectDiv');
 const outputSection = document.getElementById('outputSection');
 const commentBox = document.getElementById('generatedComment');
-const regenerateBtn = document.getElementById('regenerateBtn');
 const approveBtn = document.getElementById('approveBtn');
 const viewSavedBtn = document.getElementById('viewSavedBtn');
 const savedSection = document.getElementById('savedCommentsSection');
@@ -90,7 +89,7 @@ async function callBackend(prompt, charLimit) {
   }
 }
 
-// === COMMENT CLEANUP ===
+// === CLEANUP ===
 function cleanComment(comment) {
   const bannedPhrases = [
     "keep up the good work",
@@ -98,21 +97,18 @@ function cleanComment(comment) {
     "great job",
     "shows potential",
     "end of comment",
-    "this concludes the comment",
-    "to support his growth",
-    "to support her growth",
-    "to support their growth"
+    "this concludes the comment"
   ];
 
   const lines = comment
-    .split(/[.?!]\\s*/)
+    .split(/[.?!]\s*/)
     .filter(Boolean)
     .map(line => line.trim())
     .filter(line => {
       const lower = line.toLowerCase();
       return (
         !bannedPhrases.some(p => lower.includes(p)) &&
-        !/^(encouraging|continue|keep|aim|work)\\b/i.test(lower)
+        !/^(encouraging|continue|keep|aim|work)\b/i.test(lower)
       );
     });
 
@@ -121,7 +117,7 @@ function cleanComment(comment) {
   return final.endsWith(".") ? final : final + ".";
 }
 
-// === OTHER INTERACTIONS ===
+// === SAVE COMMENT ===
 approveBtn.addEventListener('click', () => {
   const name = document.getElementById('studentName').value.trim();
   const subject = subjectSelect.value === 'Other'
@@ -129,39 +125,61 @@ approveBtn.addEventListener('click', () => {
     : subjectSelect.value;
   const comment = commentBox.value.trim();
 
-  if (!name || !subject || !comment) return alert("Missing data to save.");
-
-  let storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
-  if (!storage[name]) storage[name] = {};
-  if (!storage[name][subject]) storage[name][subject] = [];
-
-  storage[name][subject].push(comment);
-  localStorage.setItem("savedComments", JSON.stringify(storage));
-  alert(`✅ Saved for ${name} under ${subject}`);
-});
-
-viewSavedBtn.addEventListener('click', () => {
-  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
-  const terms = JSON.parse(localStorage.getItem("savedTerms") || "[]");
-
-  savedSection.style.display = 'block';
-  studentSelect.innerHTML = "";
-
-  const students = Object.keys(storage);
-  if (students.length === 0) {
-    savedOutput.innerHTML = "<p>No saved comments found.</p>";
+  if (!name || !subject || !comment) {
+    alert("Missing student name, subject, or comment.");
     return;
   }
 
-  studentSelect.innerHTML = students.map(name => `<option value="${name}">${name}</option>`).join("");
-  displaySavedComments(students[0]);
-  displayTermHistory(terms);
+  let allComments = JSON.parse(localStorage.getItem("savedComments") || "{}");
+
+  if (!allComments[name]) allComments[name] = {};
+  if (!allComments[name][subject]) allComments[name][subject] = [];
+
+  allComments[name][subject].push(comment);
+  localStorage.setItem("savedComments", JSON.stringify(allComments));
+  alert(`✅ Comment saved for ${name} under ${subject}`);
+});
+
+// === VIEW SAVED ===
+viewSavedBtn.addEventListener('click', () => {
+  const allComments = JSON.parse(localStorage.getItem("savedComments") || "{}");
+
+  if (!Object.keys(allComments).length) {
+    savedSection.style.display = 'block';
+    savedOutput.innerHTML = "<p>No saved comments found.</p>";
+    studentSelect.innerHTML = "";
+    return;
+  }
+
+  savedSection.style.display = 'block';
+  studentSelect.innerHTML = Object.keys(allComments)
+    .map(student => `<option value="${student}">${student}</option>`)
+    .join("");
+
+  displaySavedComments(Object.keys(allComments)[0]);
 });
 
 studentSelect.addEventListener('change', () => {
   displaySavedComments(studentSelect.value);
 });
 
+function displaySavedComments(student) {
+  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
+  const subjects = storage[student];
+  let html = "";
+
+  for (const [subject, comments] of Object.entries(subjects)) {
+    html += `<h4>${subject}</h4><ul>`;
+    comments.forEach(comment => {
+      html += `<li>${comment}</li>`;
+    });
+    html += "</ul>";
+  }
+
+  savedOutput.innerHTML = html;
+}
+
+// === TERM SAVE / RESET ===
 saveTermBtn.addEventListener('click', () => {
   const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
   if (!Object.keys(storage).length) return alert("Nothing to save!");
@@ -181,22 +199,6 @@ resetBtn.addEventListener('click', () => {
   }
 });
 
-function displaySavedComments(student) {
-  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
-  const subjects = storage[student];
-  let html = "";
-
-  for (const [subject, comments] of Object.entries(subjects)) {
-    html += `<h4>${subject}</h4><ul>`;
-    comments.forEach(comment => {
-      html += `<li>${comment}</li>`;
-    });
-    html += "</ul>";
-  }
-
-  savedOutput.innerHTML = html;
-}
-
 function displayTermHistory(terms) {
   if (!terms.length) {
     termHistoryOutput.innerHTML = "<h3>No past terms saved yet.</h3>";
@@ -204,12 +206,13 @@ function displayTermHistory(terms) {
   }
 
   let html = "<h3>📂 Past Terms</h3>";
-  terms.forEach((term) => {
+  terms.forEach(term => {
     html += `<h4>${term.timestamp}</h4><pre>${JSON.stringify(term.data, null, 2)}</pre>`;
   });
   termHistoryOutput.innerHTML = html;
 }
 
+// === SUBJECT FIELD LOGIC ===
 subjectSelect.addEventListener("change", () => {
   customDiv.style.display = subjectSelect.value === "Other" ? "block" : "none";
 });
