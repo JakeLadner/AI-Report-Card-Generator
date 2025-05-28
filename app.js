@@ -98,3 +98,55 @@ async function callBackend(prompt, charLimit) {
 function cleanComment(text) {
   return text.replace(/^["']|["']$/g, "").trim();
 }
+// === SAVING & VIEWING ===
+approveBtn.addEventListener('click', () => {
+  const name = document.getElementById('studentName').value.trim();
+  const subject = subjectSelect.value === 'Other'
+    ? document.getElementById('customSubject').value.trim()
+    : subjectSelect.value;
+  const comment = commentBox.value.trim();
+
+  if (!name || !subject || !comment) return alert("Missing data to save.");
+
+  let storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
+  if (!storage[name]) storage[name] = {};
+  if (!storage[name][subject]) storage[name][subject] = [];
+
+  storage[name][subject].push(comment);
+  localStorage.setItem("savedComments", JSON.stringify(storage));
+
+  alert(`✅ Saved comment for ${name} under ${subject}`);
+});
+
+viewSavedBtn.addEventListener('click', () => {
+  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
+  const students = Object.keys(storage);
+
+  if (students.length === 0) {
+    savedOutput.innerHTML = "<p>No saved comments found.</p>";
+    return;
+  }
+
+  studentSelect.innerHTML = students.map(name => `<option value="${name}">${name}</option>`).join("");
+  displaySavedComments(students[0]);
+
+  studentSelect.addEventListener('change', () => {
+    displaySavedComments(studentSelect.value);
+  });
+});
+
+function displaySavedComments(student) {
+  const storage = JSON.parse(localStorage.getItem("savedComments") || "{}");
+  const subjects = storage[student];
+  let html = "";
+
+  for (const [subject, comments] of Object.entries(subjects)) {
+    html += `<h4>${subject}</h4><ul>`;
+    comments.forEach(comment => {
+      html += `<li>${comment}</li>`;
+    });
+    html += `</ul>`;
+  }
+
+  savedOutput.innerHTML = html;
+}
