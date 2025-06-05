@@ -1,104 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Report Card Comment Generator</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #outputSection {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 4px;
+    }
+    #savedCommentsSection {
+      margin-top: 20px;
+    }
+    .section {
+      background: #fff;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1 style="text-align:center;">📄 AI Report Card Comment Generator</h1>
+  <h2>AI Report Card Comment Generator</h2>
+
+  <form id="commentForm">
+    <label for="studentName">Student Name:</label>
+    <input type="text" id="studentName" required>
+
+    <label for="gender">Pronouns:</label>
+    <select id="gender" required>
+      <option value="He">He</option>
+      <option value="She">She</option>
+      <option value="They">They</option>
+    </select>
+
+    <label for="grade">Grade:</label>
+    <select id="grade" required>
+      <option value="">Select Grade</option>
+      <option>Grade 1</option>
+      <option>Grade 2</option>
+      <option>Grade 3</option>
+      <option>Grade 4</option>
+      <option>Grade 5</option>
+      <option>Grade 6</option>
+      <option>Grade 7</option>
+      <option>Grade 8</option>
+    </select>
+
+    <label for="subject">Subject:</label>
+    <select id="subject" required>
+      <option>Reading</option>
+      <option>Writing</option>
+      <option>Oral</option>
+      <option>Math</option>
+      <option>Social Studies</option>
+      <option>Science</option>
+      <option>Visual Arts</option>
+      <option>Dance</option>
+      <option>Music</option>
+      <option>Drama</option>
+      <option>Learning Skills</option>
+      <option>French</option>
+      <option>Other</option>
+    </select>
+
+    <div id="customSubjectDiv" style="display: none;">
+      <label for="customSubject">Enter Custom Subject:</label>
+      <input type="text" id="customSubject">
     </div>
 
-    <form id="commentForm">
-      <div class="card">
-        <label>Student Name</label>
-        <input type="text" id="studentName" required />
+    <label for="level">Level:</label>
+    <select id="level" required>
+      <option value="1">Level 1</option>
+      <option value="2">Level 2</option>
+      <option value="3" selected>Level 3</option>
+      <option value="4">Level 4</option>
+    </select>
 
-        <label>Gender</label>
-        <select id="gender">
-          <option>He</option>
-          <option>She</option>
-          <option>They</option>
-        </select>
+    <label for="notes">Teacher Notes:</label>
+    <textarea id="notes" rows="4" required></textarea>
 
-        <label>Grade</label>
-        <select id="grade" required>
-          <option value="">Select Grade</option>
-          <option>Grade 1</option>
-          <option>Grade 2</option>
-          <option>Grade 3</option>
-          <option>Grade 4</option>
-          <option>Grade 5</option>
-          <option>Grade 6</option>
-          <option>Grade 7</option>
-          <option>Grade 8</option>
-        </select>
+    <label>
+      <input type="checkbox" id="longComment"> Generate longer comment
+    </label>
 
-        <label>Subject</label>
-        <select id="subject">
-          <option>Reading</option>
-          <option>Writing</option>
-          <option>Oral</option>
-          <option>Math</option>
-          <option>Social Studies</option>
-          <option>Science</option>
-          <option>Visual Arts</option>
-          <option>Dance</option>
-          <option>Music</option>
-          <option>Drama</option>
-          <option>Learning Skills</option>
-          <option>French</option>
-          <option>Other</option>
-        </select>
+    <button type="submit">Generate Comment</button>
+  </form>
 
-        <div id="customSubjectDiv" style="display: none;">
-          <label>Enter Custom Subject</label>
-          <input type="text" id="customSubject" />
-        </div>
+  <div id="outputSection" style="display: none;">
+    <h3>Generated Comment:</h3>
+    <textarea id="generatedComment" rows="6" readonly></textarea>
+    <button id="approveBtn">Approve & Save</button>
+  </div>
 
-        <label>Achievement Level</label>
-        <select id="achievementLevel">
-          <option value="Not Provided">Not Provided</option>
-          <option value="Level 1">Level 1</option>
-          <option value="Level 2">Level 2</option>
-          <option value="Level 3">Level 3</option>
-          <option value="Level 4">Level 4</option>
-        </select>
-
-        <label>Teacher Notes</label>
-        <textarea id="notes" rows="4" required></textarea>
-
-        <label><input type="checkbox" id="longComment" /> Long Format</label>
-        <button type="submit">Generate / Regenerate Comment</button>
-      </div>
-    </form>
-
-    <div class="card" id="outputSection" style="display: none;">
-      <h2>Generated Comment</h2>
-      <textarea id="generatedComment" rows="4" style="width: 100%;"></textarea>
-      <button id="approveBtn">✅ Approve & Save</button>
-    </div>
-
-    <div class="card">
-      <button id="viewSavedBtn">📂 View Saved Comments</button>
-      <button id="saveTermBtn">💾 Save Term</button>
-      <button id="resetBtn">🗑️ Clear Current Term</button>
-    </div>
-
-    <div class="card" id="savedCommentsSection" style="display:none;">
-      <h2>📁 Saved Comments</h2>
-      <label>Choose Student</label>
+  <div class="section">
+    <button id="viewSavedBtn">View Saved Comments</button>
+    <div id="savedCommentsSection" style="display: none;">
+      <label for="studentSelect">Select Student:</label>
       <select id="studentSelect"></select>
       <div id="savedOutput"></div>
     </div>
+  </div>
 
-    <div class="card" id="termHistoryOutput"></div>
+  <div class="section">
+    <button id="saveTermBtn">Save Term Data</button>
+    <button id="resetBtn">Clear Current Term</button>
+    <div id="termHistoryOutput"></div>
   </div>
 
   <script src="app.js"></script>
 </body>
 </html>
-
